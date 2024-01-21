@@ -24,7 +24,7 @@ const PostCard = ({ post }: PostCardProps) => {
                 "/assets/icons/profile-placeholder.svg"
               }
               alt="creator"
-              className="rounded-full w-12 lg:h-12"
+              className="rounded-full w-12 lg:h-12 object-cover"
             />
           </Link>
           <div className="flex flex-col">
@@ -36,7 +36,7 @@ const PostCard = ({ post }: PostCardProps) => {
             <p className="subtle-semibold lg:small-regular">
               {multiFormatDateString(post.$createdAt)}
             </p>
-            -<p className="subtle-semibold lg:small-regular">{post.location}</p>
+            {post.location ? '-' : ''}<p className="subtle-semibold lg:small-regular">{post.location}</p>
           </div>
         </div>
 
