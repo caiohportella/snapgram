@@ -21,11 +21,11 @@ import {
   useCreateUserAccount,
   useSignInAccount,
 } from "@/lib/react-query/queries";
-// import { useUserContext } from "@/context/AuthContext";
+import { useUserContext } from "@/context/AuthContext";
 
 function SignUpForm() {
   const { toast } = useToast();
-  // const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
+  const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
   const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof SignUpValidationSchema>>({
@@ -64,14 +64,14 @@ function SignUpForm() {
 
         return;
       }
-      // const isLoggedIn = await checkAuthUser();
+      const isLoggedIn = await checkAuthUser();
 
-      // if (isLoggedIn) {
-      //   form.reset();
-      //   navigate("/");
-      // } else {
-      //   return toast({ title: "Sign up failed. Please try again." });
-      // }
+      if (isLoggedIn) {
+        form.reset();
+        navigate("/");
+      } else {
+        return toast({ title: "Sign up failed. Please try again." });
+      }
     } catch (err) {
       return toast({ title: `${err}` });
     }
@@ -145,7 +145,7 @@ function SignUpForm() {
             )}
           />
           <Button type="submit" className="shad-button_primary">
-            {isCreatingAccount || isSigningInUser ? (
+            {isCreatingAccount || isSigningInUser || isUserLoading ? (
               <div className="flex-center gap-2">
                 <Loader /> Loading...
               </div>
