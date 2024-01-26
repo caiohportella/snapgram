@@ -106,7 +106,7 @@ export async function getCurrentUser() {
 // ============================== SIGN OUT
 export async function signOutAccount() {
   try {
-    const session = await account.deleteSession("current");
+    const session = await account.deleteSessions();
 
     return session;
   } catch (error) {

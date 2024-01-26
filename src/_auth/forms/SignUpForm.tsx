@@ -21,11 +21,11 @@ import {
   useCreateUserAccount,
   useSignInAccount,
 } from "@/lib/react-query/queries";
-import { useUserContext } from "@/context/AuthContext";
+// import { useUserContext } from "@/context/AuthContext";
 
 function SignUpForm() {
   const { toast } = useToast();
-  const { checkAuthUser } = useUserContext();
+  // const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
   const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof SignUpValidationSchema>>({
@@ -40,33 +40,42 @@ function SignUpForm() {
 
   const { mutateAsync: createUserAccount, isPending: isCreatingAccount } =
     useCreateUserAccount();
-  const { mutateAsync: signInAccount } =
+  const { mutateAsync: signInAccount, isPending: isSigningInUser } =
     useSignInAccount();
 
-  async function onSubmit(values: z.infer<typeof SignUpValidationSchema>) {
-    const newUser = await createUserAccount(values);
+  const onSubmit = async (values: z.infer<typeof SignUpValidationSchema>) => {
+    try {
+      const newUser = await createUserAccount(values);
+      if (!newUser)
+        return toast({
+          title: "Seems you're already an user. Try to login instead.",
+        });
+      const session = await signInAccount({
+        email: values.email,
+        password: values.password,
+      });
 
-    if (!newUser) return toast({ title: "Sign up failed. Please try again." });
+      if (!session) {
+        toast({
+          title:
+            "Something went wrong. Try logging in with your new account instead.",
+        });
+        navigate("/sign-in");
 
-    const session = await signInAccount({
-      email: values.email,
-      password: values.password,
-    });
+        return;
+      }
+      // const isLoggedIn = await checkAuthUser();
 
-    if (!session) {
-      return toast({ title: "Sign in failed. Please try again." });
+      // if (isLoggedIn) {
+      //   form.reset();
+      //   navigate("/");
+      // } else {
+      //   return toast({ title: "Sign up failed. Please try again." });
+      // }
+    } catch (err) {
+      return toast({ title: `${err}` });
     }
-
-    const isLoggedIn = await checkAuthUser();
-
-    if (isLoggedIn) {
-      form.reset();
-      toast({ title: "Welcome to Snapgram!" });
-      navigate("/");
-    } else {
-      return toast({ title: "Sign in failed. Please try again." });
-    }
-  }
+  };
 
   return (
     <Form {...form}>
@@ -136,7 +145,7 @@ function SignUpForm() {
             )}
           />
           <Button type="submit" className="shad-button_primary">
-            {isCreatingAccount ? (
+            {isCreatingAccount || isSigningInUser ? (
               <div className="flex-center gap-2">
                 <Loader /> Loading...
               </div>

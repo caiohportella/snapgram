@@ -1,7 +1,8 @@
 import { z } from "zod";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router-dom";
+
 import {
   Form,
   FormControl,
@@ -10,13 +11,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
-import { SignInValidationSchema } from "@/lib/validation";
-import { Link, useNavigate } from "react-router-dom";
 import Loader from "@/components/shared/Loader";
+import { useToast } from "@/components/ui/use-toast";
+
+import { SignInValidationSchema } from "@/lib/validation";
 import { useSignInAccount } from "@/lib/react-query/queries";
 import { useUserContext } from "@/context/AuthContext";
 
@@ -24,6 +24,8 @@ function SignInForm() {
   const { toast } = useToast();
   const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
   const navigate = useNavigate();
+
+  const { mutateAsync: signInAccount, isPending } = useSignInAccount();
 
   const form = useForm<z.infer<typeof SignInValidationSchema>>({
     resolver: zodResolver(SignInValidationSchema),
@@ -33,15 +35,8 @@ function SignInForm() {
     },
   });
 
-  const { mutateAsync: signInAccount } = useSignInAccount();
-
-  async function onSubmit(values: z.infer<typeof SignInValidationSchema>) {
-    const session = await signInAccount({
-      email: values.email,
-      password: values.password,
-    });
-
-    console.log(session);
+  const onSubmit = async (user: z.infer<typeof SignInValidationSchema>) => {
+    const session = await signInAccount(user);
 
     if (!session) {
       return toast({ title: "Sign in failed. Please try again." });
@@ -51,12 +46,11 @@ function SignInForm() {
 
     if (isLoggedIn) {
       form.reset();
-      toast({ title: "Welcome to Snapgram!" });
       navigate("/");
     } else {
       return toast({ title: "Sign in failed. Please try again." });
     }
-  }
+  };
 
   return (
     <Form {...form}>
@@ -64,7 +58,7 @@ function SignInForm() {
         <img src={"/assets/images/logo.svg"} alt={"logo"} />
         <h2 className="h3-bold md:h2-bold pt-5 sm:pt-12">Log in</h2>
         <p className="text-light-3 small-medium md:base-regular mt-2">
-          Welcome back! Log in to your account to view today's activity.
+          Welcome back! You're missing in today's activity.
         </p>
 
         <form
@@ -98,7 +92,7 @@ function SignInForm() {
             )}
           />
           <Button type="submit" className="shad-button_primary">
-            {isUserLoading ? (
+            {isPending || isUserLoading ? (
               <div className="flex-center gap-2">
                 <Loader /> Loading...
               </div>
@@ -106,16 +100,16 @@ function SignInForm() {
               "Sign in"
             )}
           </Button>
+          <p className="text-small-regular text-light-2 text-center mt-2">
+            Don&apos;t have an account?
+            <Link
+              to="/sign-up"
+              className="text-primary-500 text-small-semibold ml-1"
+            >
+              Sign Up
+            </Link>
+          </p>
         </form>
-        <p className="text-small-regular text-light-2 text-center mt-2">
-          Don't have an account?
-          <Link
-            to="/sign-up"
-            className="text-primary-500 text-small-semibold ml-1"
-          >
-            Sign Up
-          </Link>
-        </p>
       </div>
     </Form>
   );
