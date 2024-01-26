@@ -14,9 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  SignInValidationSchema
-} from "@/lib/validation";
+import { SignInValidationSchema } from "@/lib/validation";
 import { Link, useNavigate } from "react-router-dom";
 import Loader from "@/components/shared/Loader";
 import { useSignInAccount } from "@/lib/react-query/queries";
@@ -43,7 +41,7 @@ function SignInForm() {
       password: values.password,
     });
 
-    console.log(session)
+    console.log(session);
 
     if (!session) {
       return toast({ title: "Sign in failed. Please try again." });
@@ -108,16 +106,16 @@ function SignInForm() {
               "Sign in"
             )}
           </Button>
-          <p className="text-small-regular text-light-2 text-center mt-2">
-            Don't have an account?
-            <Link
-              to="/sign-up"
-              className="text-primary-500 text-small-semibold ml-1"
-            >
-              Sign Up
-            </Link>
-          </p>
         </form>
+        <p className="text-small-regular text-light-2 text-center mt-2">
+          Don't have an account?
+          <Link
+            to="/sign-up"
+            className="text-primary-500 text-small-semibold ml-1"
+          >
+            Sign Up
+          </Link>
+        </p>
       </div>
     </Form>
   );
